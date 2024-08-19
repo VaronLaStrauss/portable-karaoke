@@ -1,0 +1,27 @@
+<div class="flex flex-col gap-10 justify-center items-center h-full">
+  @if (noCallers) {
+    <h3>There is no one here yet!</h3>
+  }
+  <mat-selection-list (selectionChange)="changeToRemove($event)">
+    @for (connection of connections | keyvalue; track connection.key) {
+      <mat-list-option [value]="connection.key">
+        <mat-icon matListItemIcon>mic</mat-icon>
+        <div matListItemTitle>{{ connection.value.name }}</div>
+        <div matListItemLine>{{ connection.key }}</div>
+        <div matListItemLine>{{ connection.value.ip }}</div>
+        <audio
+          controls
+          autoplay
+          [srcObject]="connection.value.mediaStream"
+          hidden
+        ></audio>
+      </mat-list-option>
+    }
+  </mat-selection-list>
+
+  @if (!noCallers) {
+    <button mat-button color="warn" (click)="removeSelected()">
+      Remove Selected
+    </button>
+  }
+</div>

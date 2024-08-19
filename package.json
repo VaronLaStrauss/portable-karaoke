@@ -1,0 +1,15 @@
+{
+  "name": "webrtc",
+  "module": "index.ts",
+  "type": "module",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "web": "bun run --cwd packages/sample-rtc start",
+    "server": "bun run --cwd packages/server dev",
+    "gen-keys": "bun run gen:key && bun run gen:cert",
+    "gen:key": "openssl genrsa -des3 -out ca.key 2048",
+    "gen:cert": "openssl req -x509 -new -nodes -key ca.key -sha256 -days 1825 -out ca.pem"
+  }
+}

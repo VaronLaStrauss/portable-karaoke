@@ -1,0 +1,18 @@
+<div class="h-full w-full flex flex-col gap-4 items-center justify-center">
+  <button mat-fab (click)="toggleMic()" [disabled]="!connected()">
+    <mat-icon>
+      {{ !muted() ? "mic" : "mic_off" }}
+    </mat-icon>
+  </button>
+  <mat-form-field subscriptSizing="dynamic">
+    <mat-label>Name</mat-label>
+    <input matInput placeholder="Yans" [formControl]="name" />
+  </mat-form-field>
+  <button
+    mat-button
+    (click)="connect()"
+    [disabled]="connected() || !name.value"
+  >
+    Connect
+  </button>
+</div>
