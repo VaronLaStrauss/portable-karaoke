@@ -83,7 +83,10 @@ export class SpeakComponent {
 
     const [audioStream, err] = await resolver(
       navigator.mediaDevices.getUserMedia({
-        audio: true,
+        audio: {
+          noiseSuppression: true,
+          echoCancellation: true,
+        },
         video: false,
       }),
     );
