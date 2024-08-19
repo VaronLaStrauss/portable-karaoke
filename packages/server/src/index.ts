@@ -6,7 +6,7 @@ const app = new Elysia({
     tls: {
       key: Bun.file("../../ca.key"),
       cert: Bun.file("../../ca.pem"),
-      passphrase: "abcd",
+      passphrase: Bun.env.passphrase,
     },
   },
 })
