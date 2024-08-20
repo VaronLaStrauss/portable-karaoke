@@ -5,6 +5,7 @@ import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule, MatSelectionListChange } from '@angular/material/list';
 import { MatButtonModule } from '@angular/material/button';
+import { adjustPacketizationInterval, setCodecToOpus } from '../../utils';
 
 @Component({
   selector: 'app-listen',
@@ -44,7 +45,14 @@ export class ListenComponent {
   async receiveOffer(id: string, name: string, handshake: CallHandshake) {
     if (!!this.connections[id]) return;
 
-    const peerConnection = new RTCPeerConnection();
+    const peerConnection = new RTCPeerConnection({
+      iceTransportPolicy: 'all',
+      rtcpMuxPolicy: 'require',
+      bundlePolicy: 'max-bundle',
+    });
+    peerConnection.addTransceiver('audio', {
+      direction: 'recvonly',
+    });
     const mediaStream = new MediaStream();
 
     peerConnection.ontrack = (ev) => {
@@ -62,10 +70,13 @@ export class ListenComponent {
 
     await peerConnection.setRemoteDescription(handshake);
 
-    const answer = await peerConnection.createAnswer();
-    await peerConnection.setLocalDescription(answer);
+    const { type, ...rest } = await peerConnection.createAnswer();
 
-    this.sendAnswer(id, answer);
+    let { sdp } = rest;
+    sdp = setCodecToOpus(adjustPacketizationInterval(sdp!));
+    await peerConnection.setLocalDescription({ sdp, type });
+
+    this.sendAnswer(id, { sdp, type });
   }
 
   async receiveCandidate(id: string, init: RTCIceCandidateInit) {

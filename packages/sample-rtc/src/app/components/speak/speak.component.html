@@ -11,8 +11,18 @@
   <button
     mat-button
     (click)="connect()"
-    [disabled]="connected() || !name.value"
+    [disabled]="
+      connected() || !name.value || !signalingConnected() || signalingErr()
+    "
   >
     Connect
   </button>
+
+  @if (signalingConnected()) {
+    <span>Connected to signaling server</span>
+  } @else if (signalingErr()) {
+    <span>Cannot connect to signaling server</span>
+  } @else {
+    <span>Connecting to signaling server...</span>
+  }
 </div>

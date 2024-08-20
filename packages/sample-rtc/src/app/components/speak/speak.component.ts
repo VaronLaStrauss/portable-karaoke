@@ -4,7 +4,11 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { ElysiaService } from '../../services/elysia.service';
 import { CallHandshake, SocketRes } from '../../utils/types';
-import { resolver } from '../../utils';
+import {
+  adjustPacketizationInterval,
+  resolver,
+  setCodecToOpus,
+} from '../../utils';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 
@@ -24,9 +28,15 @@ import { MatInputModule } from '@angular/material/input';
 export class SpeakComponent {
   muted = signal(true);
   connected = signal(false);
+  signalingConnected = signal(false);
+  signalingErr = signal(false);
 
   audioStream!: MediaStream;
-  peerConnection = new RTCPeerConnection();
+  peerConnection = new RTCPeerConnection({
+    iceTransportPolicy: 'all',
+    rtcpMuxPolicy: 'require',
+    bundlePolicy: 'max-bundle',
+  });
 
   name = new FormControl('');
 
@@ -34,6 +44,15 @@ export class SpeakComponent {
     private sb: MatSnackBar,
     private eden: ElysiaService,
   ) {
+    this.eden.ws.onopen = () => {
+      this.signalingConnected.set(true);
+    };
+    this.eden.ws.onclose = () => {
+      this.signalingConnected.set(false);
+    };
+    this.eden.ws.onerror = () => {
+      this.signalingErr.set(true);
+    };
     this.eden.ws.onmessage = (ev) => {
       const res = JSON.parse(ev.data) as SocketRes;
       if (res.message.type !== 'server') {
@@ -85,7 +104,7 @@ export class SpeakComponent {
       navigator.mediaDevices.getUserMedia({
         audio: {
           noiseSuppression: true,
-          echoCancellation: true,
+          echoCancellation: true,
         },
         video: false,
       }),
@@ -95,6 +114,11 @@ export class SpeakComponent {
       return;
     }
 
+    this.peerConnection.addTransceiver('audio', {
+      direction: 'sendonly',
+      sendEncodings: [{ maxBitrate: 16000 }],
+    });
+
     this.audioStream = audioStream;
     this.audioTrack.enabled = false;
 
@@ -102,11 +126,18 @@ export class SpeakComponent {
       this.peerConnection.addTrack(track, audioStream);
     });
 
-    const offer = await this.peerConnection.createOffer();
-    await this.peerConnection.setLocalDescription(offer);
+    const { type, ...rest } = await this.peerConnection.createOffer();
+    let { sdp } = rest;
+    sdp = setCodecToOpus(adjustPacketizationInterval(sdp!));
+
+    await this.peerConnection.setLocalDescription({ type, sdp });
 
     this.eden.ws.send(
-      JSON.stringify({ type: 'client', offer, name: this.name.value }),
+      JSON.stringify({
+        type: 'client',
+        offer: { type, sdp },
+        name: this.name.value,
+      }),
     );
 
     this.name.disable();

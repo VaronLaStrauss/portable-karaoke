@@ -10,9 +10,11 @@ Open two terminals and run:
 
 ```sh
 # terminal 1
-bun run web --host 0.0.0.0 --ssl
+cd sample/sample-rtc
+bun run start --host 0.0.0.0 --ssl
 # terminal 2
-bun run server
+cd server sample/server
+bun run dev
 ```
 
 Connect to `https://<your-ip-address>:4200` to view the website.
