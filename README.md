@@ -27,6 +27,12 @@ cd server sample/server
 bun run dev
 ```
 
+### Important!!!
+
+On all your devices, first go to `https://<your-ip-address>:3000` and accept the warning. This is necessary to allow the application to connect to the local server.
+
+### Usage
+
 Connect to `https://<your-ip-address>:4200` to view the website.
 
 Go to `<URL>/speak` for people who will be using the microphones.
