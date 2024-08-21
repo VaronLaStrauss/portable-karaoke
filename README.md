@@ -29,7 +29,8 @@ bun run dev
 
 ### Important!!!
 
-On all your devices, first go to `https://<your-ip-address>:3000` and accept the warning. This is necessary to allow the application to connect to the local server.
+1. On all your devices, first go to `https://<your-ip-address>:3000` and accept the warning. This is necessary to allow the application to connect to the local server.
+1. On the device you will be connecting the speakers to, first go to `https://<your-ip-address>:4200/speak` and then to `https://<your-ip-address>:4200/listen` to connect the application to the signaling server properly. If you don't do this, the application would not work properly (i.e., no voice would be heard even if the application is connected). This is a known bug and would be investigated.
 
 ### Usage
 
